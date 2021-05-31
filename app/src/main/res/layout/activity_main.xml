@@ -7,21 +7,38 @@
     tools:context=".ui.activities.MainActivity">
 
     <Button
-        android:id="@+id/button_load_more"
+        android:id="@+id/button_sync"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Carregar mais dados"
+        android:text="Sincronizar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_list_github_repositories"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="60dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         app:layoutManager="LinearLayoutManager"
-        app:layout_constraintTop_toBottomOf="@+id/button_load_more"
-        tools:layout_editor_absoluteX="16dp" />
+        app:layout_constraintBottom_toTopOf="@+id/text_view_total_count"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_sync">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <TextView
+        android:id="@+id/text_view_total_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Total: 0"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

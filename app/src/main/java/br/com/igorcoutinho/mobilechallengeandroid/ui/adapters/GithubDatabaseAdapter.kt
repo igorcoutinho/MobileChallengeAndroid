@@ -1,17 +1,16 @@
 package br.com.igorcoutinho.mobilechallengeandroid.ui.adapters
 
 import android.content.Context
-import android.widget.Toast
 import br.com.igorcoutinho.mobilechallengeandroid.data.GithubRepository
-import br.com.igorcoutinho.mobilechallengeandroid.utils.GlobalUtil
+import br.com.igorcoutinho.mobilechallengeandroid.utils.Constants
 import com.couchbase.lite.*
 
 
-class GithubDatabaseRepository(private val context: Context) {
+class GithubDatabaseAdapter(private val context: Context) {
     fun saveGithubRepositories(githubRepositoryList:  MutableList<GithubRepository>) {
         try {
             val config = DatabaseConfiguration(context)
-            val database = Database(GlobalUtil.DATABASE_NAME, config)
+            val database = Database(Constants.DATABASE_NAME, config)
 
             database.inBatch {
                 for (item in githubRepositoryList) {
@@ -36,19 +35,21 @@ class GithubDatabaseRepository(private val context: Context) {
         }
     }
 
-    fun getAllGithubRepositories(page: Int = 1): MutableList<GithubRepository> {
+    fun getAllGithubRepositories(page: Int): MutableList<GithubRepository> {
+        val limit = 30
+        val offset = (page - 1) * limit
         try {
             val config = DatabaseConfiguration(context)
-            val db = Database(GlobalUtil.DATABASE_NAME, config)
+            val db = Database(Constants.DATABASE_NAME, config)
 
             val query: Query = QueryBuilder.select(SelectResult.all())
-                .from(DataSource.database(db))
+                .from(DataSource.database(db)).limit(Expression.intValue(limit), Expression.intValue(offset))
             val result = query.execute()
 
             val listResult = mutableListOf<GithubRepository>()
 
             for (item in result) {
-                val all: Dictionary = item.getDictionary(GlobalUtil.DATABASE_NAME)
+                val all: Dictionary = item.getDictionary(Constants.DATABASE_NAME)
 
                 listResult.add(
                     GithubRepository(

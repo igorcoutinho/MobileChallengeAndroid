@@ -1,7 +1,10 @@
 package br.com.igorcoutinho.mobilechallengeandroid.ui.adapters
 
+import android.content.Context
 import br.com.igorcoutinho.mobilechallengeandroid.data.GithubRepositoriesResponse
+import br.com.igorcoutinho.mobilechallengeandroid.utils.Constants
 import br.com.igorcoutinho.mobilechallengeandroid.viewmodels.GitHubViewModel
+import br.com.igorcoutinho.mobilechallengeandroid.viewmodels.GithubLiveDataViewModel
 import com.google.gson.GsonBuilder
 import retrofit2.Call
 import retrofit2.Callback
@@ -9,26 +12,35 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class RetrofiRepository (private val databaseRepository: GithubDatabaseRepository ): Callback<GithubRepositoriesResponse> {
+class RetrofitAdapter(
+    context: Context,
+    private val githubModelLiveDataModel: GithubLiveDataViewModel
+) : Callback<GithubRepositoriesResponse> {
 
-    fun getRepositoriesFromCloud() {
+    private val databaseAdapter: GithubDatabaseAdapter = GithubDatabaseAdapter(context);
+    private val githubDatabaseAdapter: GithubDatabaseAdapter = GithubDatabaseAdapter(context)
+
+    var page = 0
+
+    fun loadRepositoriesFromCloud(page: Int) {
+        this.page = page
         try {
             val gson = GsonBuilder()
                 .setLenient()
                 .create()
 
             val retrofit = Retrofit.Builder()
-                .baseUrl("https://api.github.com/")
+                .baseUrl(Constants.GITHUB_URL)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
 
             val service = retrofit.create(GitHubViewModel::class.java)
 
 
-            val callService: Call<GithubRepositoriesResponse> = service.listRepositories(2)
+            val callService: Call<GithubRepositoriesResponse> = service.listRepositories(page)
             callService.enqueue(this)
 
-        }catch (ex: Exception) {
+        } catch (ex: Exception) {
             throw ex
         }
 
@@ -38,12 +50,16 @@ class RetrofiRepository (private val databaseRepository: GithubDatabaseRepositor
         call: Call<GithubRepositoriesResponse>,
         response: Response<GithubRepositoriesResponse>
     ) {
-        if(response.isSuccessful) {
+        if (response.isSuccessful) {
             val githubResponse = response.body()
 
-            databaseRepository.saveGithubRepositories(githubResponse!!.items)
+            databaseAdapter.saveGithubRepositories(githubResponse!!.items)
 
-        }else {
+            val repositories = githubDatabaseAdapter.getAllGithubRepositories(page)
+
+            githubModelLiveDataModel.githubRepositoriesList.value = repositories
+
+        } else {
             throw Exception("Erro ao consultar os repositórios: ${response.message()}")
         }
 
